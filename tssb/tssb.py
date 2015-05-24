@@ -2,7 +2,6 @@ import numpy as np
 import scipy.stats as stats
 
 from dist import Distribution
-from measure import RandomCountingMeasure
 from gem import LazyGEM
 
 def depth_weight(a, l):
@@ -12,7 +11,7 @@ def depth_weight(a, l):
 
 class TSSB(Distribution):
 
-    def __init__(self, index=[], depth=0, alpha=depth_weight(1.0, 0.5), gamma=0.2):
+    def __init__(self, index=(), depth=0, alpha=depth_weight(1.0, 0.5), gamma=0.2):
         self.index = index
         self.depth = depth
         self.alpha = alpha
@@ -27,7 +26,7 @@ class TSSB(Distribution):
             while self.cur_index < key:
                 self.cur_index += 1
                 self.children.append(TSSB(
-                    index=self.index + [self.cur_index],
+                    index=self.index + (self.cur_index,),
                     depth=self.depth + 1,
                     alpha=self.alpha,
                     gamma=self.gamma
@@ -36,7 +35,7 @@ class TSSB(Distribution):
 
     def uniform_index(self, u):
         if u < self.nu:
-            return self
+            return self.index
         u = (u - self.nu) / (1.0 - self.nu)
         i, right_weight = self.psi.uniform_index(u)
         child, weight = self.get_child(i), self.psi[i]
