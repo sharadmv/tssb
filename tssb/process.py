@@ -21,7 +21,7 @@ class IndependentRandomProcess(RandomProcess):
 
 class MarkovRandomProcess(RandomProcess):
 
-    def __init__(self, next, initial, ndtype=np.longdouble):
+    def __init__(self, initial, next, ndtype=np.longdouble):
         super(MarkovRandomProcess, self).__init__(next, ndtype=ndtype)
         self.initial = initial
 
@@ -37,16 +37,17 @@ class MarkovRandomProcess(RandomProcess):
 
 class MarkovTreeRandomProcess(MarkovRandomProcess):
 
-    def __init__(self, next, initial, ndtype=np.longdouble):
-        super(MarkovTreeRandomProcess, self).__init__(next, initial, ndtype=ndtype)
+    def __init__(self, initial, next, ndtype=np.longdouble):
+        super(MarkovTreeRandomProcess, self).__init__(initial, next, ndtype=ndtype)
         self.items = {}
 
     def __getitem__(self, key):
         if key not in self.items:
             if len(key) == 0:
                 self.items[key] = self.initial()
-            parent = self[key[:-1]]
-            self.items[key] = self.next(parent)
+            else:
+                parent = self[key[:-1]]
+                self.items[key] = self.next(parent)
         return self.items[key]
 
 def create_gaussian_markov_process(eta, cov, prior):
@@ -58,4 +59,4 @@ def create_gaussian_markov_process(eta, cov, prior):
         mean, cov = prev
         return (stats.multivariate_normal(mean=mean, cov=cov).rvs(), cov)
 
-    return MarkovTreeRandomProcess(next, initial, ndtype=np.longdouble)
+    return MarkovTreeRandomProcess(initial, next, ndtype=np.longdouble)
